@@ -17,7 +17,6 @@ if ($GLOBALS['debug'] = true) {
     echo "###########################################################\n";
     echo "Mode production - Pas de logs en local.\n";
     echo "###########################################################\n";
-
 }
 
 
@@ -38,7 +37,6 @@ function loadXmlFile($xmlFilePath) {
         logMessage("Erreur lors de la création de SimpleXMLElement: " . $e->getMessage(), 'error');
         return null;
     }
-
     return $xmlObject;
 }
 
@@ -73,7 +71,6 @@ function saveModifiedXml($xmlObject, $originalFilePath) {
     $dom->preserveWhiteSpace = false;
     $dom->formatOutput = true;
     $dom->loadXML($xmlObject->asXML());
-
     $pathInfo = pathinfo($originalFilePath);
     if ($GLOBALS['debug']) {
         $outputDir = './OUT/';
@@ -85,7 +82,6 @@ function saveModifiedXml($xmlObject, $originalFilePath) {
     }
     $outputFileName = $outputDir . $pathInfo['filename'] . '-edited.xml';
     $dom->save($outputFileName);
-
     return $outputFileName;
 }
 #####################################################################
@@ -129,6 +125,9 @@ function processXmlFiles($directory) {
 #####################################################################
 # Fonction pour traiter les fichiers ZIP et XML dans le dossier IN
 #####################################################################
+#####################################################################
+# Fonction pour traiter les fichiers ZIP et XML dans le dossier IN
+#####################################################################
 function processZipAndXmlFiles() {
     $inputDir = './IN/';
     $tempDir = './TEMP/';
@@ -139,25 +138,39 @@ function processZipAndXmlFiles() {
     $allFiles = glob($inputDir . '*');
     $zipFiles = glob($inputDir . '*.zip');
     $nonZipFiles = array_diff($allFiles, $zipFiles);
-    var_dump($allFiles);
+    if($GLOBALS['debug']) {
+        var_dump($allFiles);
+    }
 
     if (!empty($nonZipFiles)) {
-        var_dump($nonZipFiles);
+        if($GLOBALS['debug']) {
+            var_dump($nonZipFiles);
+        }
+
         foreach ($nonZipFiles as $file) {
             if (pathinfo($file, PATHINFO_EXTENSION) === 'xml') {
                 processXmlFile($file, $tempDir);
             } else {
                 logMessage("Fichier non ZIP détecté : " . basename($file), 'error');
             }
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+    foreach ($zipFiles as $zipFile) {
+        unzipFiles($zipFile, $tempDir);
+        if (is_file($zipFile)) {
+            unlink($zipFile);
         }
     }
 
-    foreach ($zipFiles as $zipFile) {
-        unzipFiles($zipFile, $tempDir);
-    }
     $modifiedFiles = processXmlFiles($tempDir);
     array_map('unlink', glob("$tempDir*"));
 }
+
+
+
 
 function processXmlFile($file, $tempDir) {
     copy($file, $tempDir . basename($file));
