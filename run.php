@@ -4,14 +4,32 @@
 ################################################################
 $GLOBALS['outFilePath'] ='D:/Flux/Scaner/LOGILEC_PROD/emission/';
 ###########################################################
+# Mode débogage - Active ou désactive les messages de log
+#Mettre à "true" pour activer le mode debug
+###########################################################
+$GLOBALS['debug'] = true;
+
+if ($GLOBALS['debug'] = true) {
+    echo "###########################################################\n";
+    echo "Mode debug activé - Les logs seront affichés en local.\n";
+    echo "###########################################################\n";
+} else {
+    echo "###########################################################\n";
+    echo "Mode production - Pas de logs en local.\n";
+    echo "###########################################################\n";
+
+}
+
+
+
+
+###########################################################
 # Fonction pour charger et nettoyer un fichier XML
 ###########################################################
 function loadXmlFile($xmlFilePath) {
     $xml = file_get_contents($xmlFilePath);
     $xml = trim($xml);
-    // Convertir l'encodage si nécessaire
     if (!mb_check_encoding($xml, 'UTF-8')) {
-		// Remplacer 'ISO-8859-1' par l'encodage d'origine si nécessaire
         $xml = mb_convert_encoding($xml, 'UTF-8', 'ISO-8859-1'); 
     }
     try {
@@ -55,13 +73,21 @@ function saveModifiedXml($xmlObject, $originalFilePath) {
     $dom->preserveWhiteSpace = false;
     $dom->formatOutput = true;
     $dom->loadXML($xmlObject->asXML());
+
     $pathInfo = pathinfo($originalFilePath);
-    $outputFileName = $GLOBALS['outFilePath'] . $pathInfo['filename'] . '-edited.xml';
-    //$outputFileName = './OUT/' . $pathInfo['filename'] . '-edited.xml'; outdir 
+    if ($GLOBALS['debug']) {
+        $outputDir = './OUT/';
+    } else {
+        $outputDir = $GLOBALS['outFilePath'];
+    }
+    if (!is_dir($outputDir)) {
+        mkdir($outputDir, 0777, true); // 0777
+    }
+    $outputFileName = $outputDir . $pathInfo['filename'] . '-edited.xml';
     $dom->save($outputFileName);
+
     return $outputFileName;
 }
-
 #####################################################################
 # Fonction pour décompresser les fichiers ZIP
 #####################################################################
@@ -142,7 +168,6 @@ function processXmlFile($file, $tempDir) {
 # Fonction pour enregistrer des messages dans un fichier log
 #####################################################################
 function logMessage($message, $type = 'info') {
-    # Fichier de log dans la racine du script
     $logFile = __DIR__ . '/' . ($type === 'error' ? 'error_log.txt' : 'info_log.txt');
     $currentDate = date('Y-m-d H:i:s');
     file_put_contents($logFile, "[$currentDate] " . strtoupper($type) 
