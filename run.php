@@ -7,17 +7,13 @@ $GLOBALS['outFilePath'] ='D:/Flux/Scaner/LOGILEC_PROD/emission/';
 # Mode débogage - Active ou désactive les messages de log
 #Mettre à "true" pour activer le mode debug
 ###########################################################
-$GLOBALS['debug'] = true;
+$GLOBALS['debug'] = false;
 
 if ($GLOBALS['debug'] = true) {
     echo "###########################################################\n";
     echo "Mode debug activé - Les logs seront affichés en local.\n";
     echo "###########################################################\n";
-} else {
-    echo "###########################################################\n";
-    echo "Mode production - Pas de logs en local.\n";
-    echo "###########################################################\n";
-}
+} 
 
 
 
@@ -72,7 +68,7 @@ function saveModifiedXml($xmlObject, $originalFilePath) {
     $dom->formatOutput = true;
     $dom->loadXML($xmlObject->asXML());
     $pathInfo = pathinfo($originalFilePath);
-    if ($GLOBALS['debug']) {
+    if ($GLOBALS['debug'] = false) {
         $outputDir = './OUT/';
     } else {
         $outputDir = $GLOBALS['outFilePath'];
@@ -122,9 +118,6 @@ function processXmlFiles($directory) {
     return $modifiedFiles;
 }
 
-#####################################################################
-# Fonction pour traiter les fichiers ZIP et XML dans le dossier IN
-#####################################################################
 #####################################################################
 # Fonction pour traiter les fichiers ZIP et XML dans le dossier IN
 #####################################################################
